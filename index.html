@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>vrxAI V112</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font:15px -apple-system,sans-serif;background:#000;color:#fff;height:100vh;display:flex;flex-direction:column}
+        #top{background:#1C1C1E;border-bottom:1px solid #38383A;padding:12px;flex-shrink:0}
+        #header{display:flex;align-items:center;gap:10px}
+        #dot{width:8px;height:8px;background:#30D158;border-radius:50%;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+        #title{font-weight:600;font-size:16px;flex:1}
+        .hbtn{background:#2C2C2E;border:none;color:#fff;width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer}
+        .hbtn:active{opacity:.6}
+        #statusbar{background:#1C1C1E;border-bottom:1px solid #38383A;padding:6px 12px;font-size:12px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+        #status{color:#30D158}
+        #status.err{color:#FF453A}
+        #modeltag{font-size:11px;background:#2C2C2E;padding:4px 8px;border-radius:6px;color:#0A84FF;font-weight:600}
+        #chat{flex:1;overflow-y:auto;padding:16px 12px}
+       .msg{margin-bottom:16px;max-width:85%}
+       .msg.user{margin-left:auto}
+       .msg.ai{margin-right:auto}
+       .bubble{padding:12px 14px;border-radius:18px;line-height:1.5}
+       .bubble.user{background:#0A84FF;color:#fff;border-bottom-right-radius:4px}
+       .bubble.ai{background:#2C2C2E;color:#fff;border:1px solid #38383A;border-bottom-left-radius:4px}
+       .msg-name{font-size:12px;color:#8E8E93;margin-bottom:4px;font-weight:600}
+       .msg-actions{margin-top:8px;display:flex;gap:8px}
+       .msg-actions button{background:#1C1C1E;border:1px solid #38383A;color:#0A84FF;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer}
+       .msg-actions button:active{opacity:.6}
+       .msg img{max-width:100%;border-radius:12px;margin-top:8px}
+        pre{background:#000;border:1px solid #38383A;border-radius:8px;padding:12px;overflow-x:auto;margin:8px 0;position:relative}
+       .copy{position:absolute;top:8px;right:8px;padding:6px 10px;background:#2C2C2E;border:1px solid #38383A;border-radius:6px;font-size:11px;cursor:pointer;color:#0A84FF}
+        code{background:#000;padding:2px 6px;border-radius:4px;font-size:13px}
+        #bottom{background:#000;padding:8px 12px 12px;flex-shrink:0;border-top:1px solid #38383A}
+        #inputbox{background:#1C1C1E;border:1.5px solid #38383A;border-radius:24px;padding:4px;display:flex;align-items:flex-end;gap:8px}
+        #inputbox:focus-within{border-color:#0A84FF}
+        #filebtn,#micbtn{width:34px;height:34px;border-radius:50%;background:#2C2C2E;border:none;color:#8E8E93;font-size:18px;cursor:pointer;flex-shrink:0}
+        #filebtn:active,#micbtn:active{opacity:.6}
+        #input{flex:1;background:none;border:none;color:#fff;font:15px sans-serif;padding:8px 0;resize:none;max-height:120px}
+        #input:focus{outline:none}
+        #input::placeholder{color:#636366}
+        #send{width:34px;height:34px;background:#0A84FF;border:none;color:#fff;border-radius:50%;font-size:16px;cursor:pointer;flex-shrink:0}
+        #send:disabled{opacity:.3}
+        #send:active{scale:.9}
+        #file{display:none}
+        #fileview{display:none;padding:10px;background:#2C2C2E;border:1px solid #38383A;border-radius:12px;margin-bottom:8px;position:relative}
+        #fileview.show{display:block}
+        #fileview img{max-width:100%;max-height:150px;border-radius:8px}
+        #delfile{position:absolute;top:8px;right:8px;background:#FF453A;border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer}
+        #chips{display:flex;gap:6px;padding:8px 4px 0;overflow-x:auto}
+       .chip{padding:6px 12px;background:#2C2C2E;border:1px solid #38383A;color:#fff;border-radius:16px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+       .chip:active{background:#0A84FF;border-color:#0A84FF}
+        #footer{display:flex;justify-content:space-between;padding:4px 16px;font-size:11px;color:#636366}
+        #sidebar{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:999;display:none}
+        #sidebar.show{display:flex}
+        #sidebox{width:280px;background:#1C1C1E;height:100%;animation:slide .3s}
+        @keyframes slide{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+        #sidehead{padding:16px;border-bottom:1px solid #38383A;display:flex;justify-content:space-between;align-items:center}
+        #sidelist{flex:1;overflow-y:auto;padding:12px}
+       .chatitem{padding:12px;border-radius:12px;margin-bottom:8px;cursor:pointer;border:1px solid #38383A;background:#2C2C2E}
+       .chatitem:active{opacity:.6}
+       .chattitle{font-weight:600;margin-bottom:4px;font-size:14px}
+       .chatmeta{font-size:12px;color:#8E8E93}
+    </style>
+</head>
+<body>
+    <div id="top">
+        <div id="header">
+            <button class="hbtn" onclick="showSide()">☰</button>
+            <div id="dot"></div>
+            <div id="title">vrxAI V112</div>
+            <div id="modeltag">Llama 3.3</div>
+            <button class="hbtn" onclick="newChat()">+</button>
+            <button class="hbtn" onclick="downloadChat()">↓</button>
+            <button class="hbtn" onclick="clearChat()">🗑️</button>
+        </div>
+    </div>
+    
+    <div id="statusbar">
+        <div id="status">✅ Mesin aktif - Llama 3.3 70B</div>
+        <div id="tokens">Token: 0/6000</div>
+    </div>
+    
+    <div id="chat"></div>
+    
+    <div id="bottom">
+        <div id="fileview">
+            <button id="delfile" onclick="removeFile()">×</button>
+            <div id="fileinfo"></div>
+        </div>
+        <div id="inputbox">
+            <button id="micbtn" onclick="toggleMic()">🎤</button>
+            <button id="filebtn" onclick="document.getElementById('file').click()">📎</button>
+            <input type="file" id="file" accept="image/*,.pdf,.txt" onchange="handleFile(event)">
+            <textarea id="input" placeholder="Tanya / /img / upload file" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+            <button id="send" onclick="sendMsg()">↑</button>
+        </div>
+        <div id="chips">
+            <button class="chip" onclick="quick('Jelaskan AI')">🤖 AI</button>
+            <button class="chip" onclick="quick('/img kucing lucu')">🎨 Gambar</button>
+            <button class="chip" onclick="quick('Buat kode Python')">💻 Kode</button>
+            <button class="chip" onclick="quick('Analisis gambar ini')">🖼️ Analisis</button>
+        </div>
+    </div>
+    
+    <div id="footer">
+        <span>vrxllan © 2026</span>
+        <span id="ready">Ready</span>
+    </div>
+
+    <div id="sidebar" onclick="if(event.target===this)hideSide()">
+        <div id="sidebox">
+            <div id="sidehead">
+                <b>Riwayat Chat</b>
+                <button class="hbtn" onclick="hideSide()">✕</button>
+            </div>
+            <div id="sidelist"></div>
+        </div>
+    </div>
+
+<script>
+// GANTI API KEY LU DI SINI xso 👇
+var KEY = 'gsk_ganti_pake_key_lu_disini';
+
+var chats = JSON.parse(localStorage.getItem('vrx_chats')||'[]');
+var currentFile = null;
+var totalTokens = 0;
+var isRec = false;
+
+// MODEL TERBARU 2026 - GAK BAKAL DECOMMISSIONED
+var MODELS = {
+    chat: 'llama-3.3-70b-versatile',
+    vision: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    backup: 'mixtral-8x7b-32768'
+};
+var currentModel = MODELS.chat;
+
+var chat = document.getElementById('chat');
+var input = document.getElementById('input');
+var send = document.getElementById('send');
+var file = document.getElementById('file');
+var fileview = document.getElementById('fileview');
+var fileinfo = document.getElementById('fileinfo');
+var tokens = document.getElementById('tokens');
+var ready = document.getElementById('ready');
+var status = document.getElementById('status');
+var modeltag = document.getElementById('modeltag');
+var sidebar = document.getElementById('sidebar');
+var sidelist = document.getElementById('sidelist');
+
+// AUTO TEST KEY PAS BUKA
+window.onload = function(){
+    if(KEY==='gsk_ganti_pake_key_lu_disini'){
+        status.textContent = '❌ Ganti API Key di baris 181';
+        status.className = 'err';
+        addMsg('⚠️ API Key belum diganti!\n\nBuka index.html → Cari baris 181 → Ganti gsk_ganti_pake_key_lu_disini pake key lu','ai');
+        return;
+    }
+    
+    status.textContent = '⏳ Test key...';
+    fetch('https://api.groq.com/openai/v1/models',{
+        headers:{'Authorization':'Bearer '+KEY}
+    }).then(function(r){
+        if(!r.ok) throw new Error();
+        status.textContent = '✅ Mesin aktif - '+currentModel;
+        status.className = '';
+        setTimeout(function(){
+            addMsg('Halo vrxllan! 🔥 V112 udah ready.\n\nModel: Llama 3.3 70B\nKetik /img kucing buat test gambar!','ai');
+        },500);
+    }).catch(function(){
+        status.textContent = '❌ API Key salah';
+        status.className = 'err';
+        addMsg('❌ API Key error. Cek lagi di console.groq.com/keys','ai');
+    });
+};
+
+// AUTO RESIZE TEXTAREA
+input.oninput = function(){
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight,120)+'px';
+};
+
+function addMsg(txt,type,img){
+    var div = document.createElement('div');
+    div.className = 'msg '+type;
+    
+    var bubble = document.createElement('div');
+    bubble.className = 'bubble '+type;
+    
+    if(type==='ai'){
+        var name = document.createElement('div');
+        name.className = 'msg-name';
+        name.textContent = 'vrxAI';
+        bubble.appendChild(name);
+    }
+    
+    var content = document.createElement('div');
+    content.innerHTML = txt.replace(/\n/g,'<br>').replace(/`([^`]+)`/g,'<code>$1</code>');
+    bubble.appendChild(content);
+    
+    if(txt.indexOf('```')!==-1){
+        setTimeout(function(){
+            bubble.querySelectorAll('pre').forEach(function(pre){
+                var btn = document.createElement('button');
+                btn.className = 'copy';
+                btn.textContent = 'Copy';
+                btn.onclick = function(){
+                    navigator.clipboard.writeText(pre.textContent);
+                    btn.textContent = 'Copied!';
+                    setTimeout(function(){btn.textContent='Copy'},1000);
+                };
+                pre.appendChild(btn);
+            });
+        },100);
+    }
+    
+    if(img){
+        var image = document.createElement('img');
+        image.src = img;
+        image.onclick = function(){window.open(img)};
+        bubble.appendChild(image);
+    }
+    
+    if(type==='ai'){
+        var actions = document.createElement('div');
+        actions.className = 'msg-actions';
+        actions.innerHTML = '<button onclick="copyTxt(this)">📋 Copy</button><button onclick="speakTxt(this)">🔊 Speak</button>';
+        bubble.appendChild(actions);
+    }
+    
+    div.appendChild(bubble);
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function copyTxt(btn){
+    var txt = btn.closest('.bubble').querySelector('div:nth-child(2)').innerText;
+    navigator.clipboard.writeText(txt);
+    btn.textContent = '✓ Copied';
+    setTimeout(function(){btn.textContent='📋 Copy'},1000);
+}
+
+function speakTxt(btn){
+    var txt = btn.closest('.bubble').querySelector('div:nth-child(2)').innerText;
+    var msg = new SpeechSynthesisUtterance(txt);
+    msg.lang = 'id-ID';
+    speechSynthesis.speak(msg);
+}
+
+function handleFile(e){
+    var f = e.target.files[0];
+    if(!f) return;
+    if(f.size>10*1024*1024){
+        alert('File terlalu besar! Maks 10MB');
+        return;
+    }
+    currentFile = f;
+    if(f.type.indexOf('image')===0){
+        var reader = new FileReader();
+        reader.onload = function(e){
+            fileinfo.innerHTML = '<img src="'+e.target.result+'"><div style="margin-top:8px"><b>'+f.name+'</b><br><small>'+(f.size/1024).toFixed(1)+' KB</small></div>';
+        };
+        reader.readAsDataURL(f);
+    }else{
+        fileinfo.innerHTML = '<div style="font-size:40px">📄</div><div><b>'+f.name+'</b><br><small>'+(f.size/1024).toFixed(1)+' KB</small></div>';
+    }
+    fileview.classList.add('show');
+}
+
+function removeFile(){
+    currentFile = null;
+    fileview.classList.remove('show');
+    file.value = '';
+}
+
+function sendMsg(){
+    var txt = input.value.trim();
+    if(!txt&&!currentFile) return;
+    if(KEY==='gsk_ganti_pake_key_lu_disini'){
+        alert('Ganti API Key dulu di baris 181!');
+        return;
+    }
+    
+    send.disabled = true;
+    ready.textContent = 'Sending...';
+    
+    addMsg(txt||'[Gambar]','user');
+    
+    var model = MODELS.chat;
+    var messages = [{role:"user",content:txt}];
+    
+    // Handle /img command
+    if(txt.indexOf('/img ')==0){
+        model = MODELS.vision;
+        messages = [{role:"user",content:"Generate image: "+txt.substring(5)}];
+    }
+    
+    if(currentFile&&currentFile.type.indexOf('image')===0){
+        model = MODELS.vision;
+        var reader = new FileReader();
+        reader.onload = function(e){
+            messages = [{role:"user",content:[{type:"text",text:txt},{type:"image_url",image_url:{url:e.target.result}}]}];
+            callAPI(model,messages);
+        };
+        reader.readAsDataURL(currentFile);
+    }else{
+        callAPI(model,messages);
+    }
+    
+    input.value = '';
+    input.style.height = 'auto';
+    currentFile = null;
+    fileview.classList.remove('show');
+    file.value = '';
+}
+
+function callAPI(model,messages){
+    currentModel = model;
+    modeltag.textContent = model.split('/').pop().substring(0,15);
+    
+    fetch('https://api.groq.com/openai/v1/chat/completions',{
+        method:'POST',
+        headers:{'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},
+        body:JSON.stringify({model:model,messages:messages,temperature:0.7,max_tokens:2048})
+    }).then(function(r){
+        return r.json();
+    }).then(function(d){
+        if(d.choices){
+            var rep = d.choices[0].message.content;
+            addMsg(rep,'ai');
+            totalTokens += d.usage?d.usage.total_tokens:0;
+            tokens.textContent = 'Token: '+totalTokens+'/6000';
+            chats.push({u:input.value,a:rep,t:Date.now()});
+            localStorage.setItem('vrx_chats',JSON.stringify(chats));
+        }else if(d.error){
+            // Auto fallback ke model backup
+            if(model!==MODELS.backup){
+                addMsg('⚠️ '+model+' error. Coba pake Mixtral...','ai');
+                callAPI(MODELS.backup,messages);
+                return;
+            }
+            addMsg('Error: '+d.error.message,'ai');
+        }
+        send.disabled = false;
+        ready.textContent = 'Ready';
+    }).catch(function(e){
+        addMsg('Error: '+e.message,'ai');
+        send.disabled = false;
+        ready.textContent = 'Ready';
+    });
+}
+
+function quick(txt){
+    input.value = txt;
+    sendMsg();
+}
+
+function newChat(){
+    chat.innerHTML = '';
+    chats = [];
+    localStorage.removeItem('vrx_chats');
+    totalTokens = 0;
+    tokens.textContent = 'Token: 0/6000';
+    addMsg('Halo vrxllan! 🔥 V112 udah ready.\n\nModel: Llama 3.3 70B\nKetik /img kucing buat test gambar!','ai');
+}
+
+function clearChat(){
+    if(confirm('Hapus semua chat?')){
+        newChat();
+    }
+}
+
+function downloadChat(){
+    var text = Array.from(chat.querySelectorAll('.bubble')).map(function(b){
+        var isUser = b.classList.contains('user');
+        return (isUser?'You: ':'AI: ')+b.innerText;
+    }).join('\n\n');
+    var blob = new Blob([text],{type:'text/plain'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'vrxAI-V112-'+Date.now()+'.txt';
+    a.click();
+}
+
+function showSide(){
+    sidelist.innerHTML = '';
+    if(chats.length===0){
+        sidelist.innerHTML = '<div style="text-align:center;padding:60px;color:#8E8E93">Belum ada riwayat</div>';
+    }else{
+        chats.forEach(function(c,i){
+            var div = document.createElement('div');
+            div.className = 'chatitem';
+            div.innerHTML = '<div class="chattitle">Chat '+(i+1)+'</div><div class="chatmeta">'+new Date(c.t).toLocaleString('id-ID')+'</div>';
+            div.onclick = function(){
+                chat.innerHTML = '';
+                addMsg(c.u,'user');
+                addMsg(c.a,'ai');
+                hideSide();
+            };
+            sidelist.appendChild(div);
+        });
+    }
+    sidebar.classList.add('show');
+}
+
+function hideSide(){
+    sidebar.classList.remove('show');
+}
+
+function toggleMic(){
+    if(!isRec){
+        var rec = new webkitSpeechRecognition();
+        rec.lang = 'id-ID';
+        rec.onresult = function(e){
+            input.value = e.results[0][0].transcript;
+            sendMsg();
+        };
+        rec.start();
+        isRec = true;
+        document.getElementById('micbtn').style.background = '#FF453A';
+    }else{
+        isRec = false;
+        document.getElementById('micbtn').style.background = '#2C2C2E';
+    }
+}
+</script>
+</body>
+</html>
