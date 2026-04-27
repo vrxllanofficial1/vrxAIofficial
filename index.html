@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>vrxAI V112</title>
+    <title>vrxAI V2.0</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
         body{font:15px -apple-system,sans-serif;background:#000;color:#fff;height:100vh;display:flex;flex-direction:column}
@@ -70,7 +70,7 @@
         <div id="header">
             <button class="hbtn" onclick="showSide()">☰</button>
             <div id="dot"></div>
-            <div id="title">vrxAI V112</div>
+            <div id="title">vrxAI V2.0</div>
             <div id="modeltag">Llama 3.3</div>
             <button class="hbtn" onclick="newChat()">+</button>
             <button class="hbtn" onclick="downloadChat()">↓</button>
@@ -121,7 +121,7 @@
     </div>
 
 <script>
-// GANTI API KEY LU DI SINI xso 👇
+// GANTI API KEY LU DI SINI vrxllan 👇
 var KEY = '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';
 
 var chats = JSON.parse(localStorage.getItem('vrx_chats')||'[]');
@@ -167,7 +167,7 @@ window.onload = function(){
         status.textContent = '✅ Mesin aktif - '+currentModel;
         status.className = '';
         setTimeout(function(){
-            addMsg('Halo vrxllan! 🔥 V112 udah ready.\n\nModel: Llama 3.3 70B\nKetik /img kucing buat test gambar!','ai');
+            addMsg('Halo vrxllan! 🔥 V2.0 udah ready.\n\nModel: Llama 3.3 70B\nKetik /img kucing buat test gambar!','ai');
         },500);
     }).catch(function(){
         status.textContent = '❌ API Key salah';
@@ -363,7 +363,7 @@ function newChat(){
     localStorage.removeItem('vrx_chats');
     totalTokens = 0;
     tokens.textContent = 'Token: 0/6000';
-    addMsg('Halo vrxllan! 🔥 V112 udah ready.\n\nModel: Llama 3.3 70B\nKetik /img kucing buat test gambar!','ai');
+    addMsg('Halo vrxllan! 🔥 V2.0 udah ready.\n\nModel: Llama 3.3 70B\nKetik /img kucing buat test gambar!','ai');
 }
 
 function clearChat(){
@@ -381,7 +381,7 @@ function downloadChat(){
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'vrxAI-V112-'+Date.now()+'.txt';
+    a.download = 'vrxAI-V2.0-'+Date.now()+'.txt';
     a.click();
 }
 
